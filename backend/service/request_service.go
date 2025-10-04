@@ -1,8 +1,8 @@
 package service
 
 import (
-    "../domain"
-    "../repository"
+    "backend/domain"
+    "backend/repository"
     "time"
 )
 
