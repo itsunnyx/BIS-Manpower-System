@@ -1,69 +1,35 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
-	"log"
-	"os"
+
+	"manpower/internal/db"
+	"manpower/internal/repository"
+	"manpower/internal/service"
+	httpx "manpower/internal/transport/http"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
-
-	"manpower/transport/http/handlers"
+	"net/http"
 )
 
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
-}
+func main(){
+	conn := db.InitDB()
+	defer conn.Close()
 
-var db *sql.DB
-
-func initDB() *sql.DB {
-	// ตัวอย่าง connection string
-	dsn := "host=localhost port=5432 user=admin password=1234 dbname=hr sslmode=disable"
-
-	database, err := sql.Open("postgres", dsn)
-	if err != nil {
-		log.Fatalf("Error opening database: %v", err)
-	}
-
-	// ตรวจสอบการเชื่อมต่อ
-	err = database.Ping()
-	if err != nil {
-		log.Fatalf("Error connecting to database: %v", err)
-	}
-
-	fmt.Println("Connected to database successfully!")
-	return database
-}
-
-func main() {
-	db = initDB()
-	defer db.Close()
+	reqRepo := repository.NewRequestRepo(conn)
+	reqSvc  := service.NewRequestService(reqRepo)
+	
 	r := gin.Default()
 
-	// Health check
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ok"})
+	r.GET("/health", func(c *gin.Context){
+		err := conn.Ping()
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"message": "unhealthy", "error":err})
+			return
+		}
+		c.JSON(200, gin.H{"message" : "healthy"})
 	})
 
-	// routes จริง
-	api := r.Group("/api")
-	{
-		api.GET("/requests", handlers.GetManpowerRequests(db))    // ดึงรายการคำร้อง
-		api.POST("/requests", handlers.CreateManpowerRequest(db)) // สร้างคำร้องใหม่
-	}
+	httpx.RegisterRoutes(r, reqSvc)
 
-	// start server
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	log.Println("Server started at :" + port)
-	if err := r.Run(":" + port); err != nil {
-		log.Fatal(err)
-	}
+	r.Run(":8080")
 }
