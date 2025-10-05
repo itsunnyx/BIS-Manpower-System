@@ -1,27 +1,26 @@
 package http
 
 import (
-	"manpower/repository"
-	"manpower/service"
-	"manpower/transport/http/handlers"
 	"database/sql"
-	"net/http"
 
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
+	"manpower/transport/http/handlers"
+
+	"github.com/gin-gonic/gin"
 )
 
-func NewServer(db *sql.DB) *http.Server {
-	repo := repository.NewRequestRepository(db)
-	service := service.NewRequestService(repo)
-	handler := handlers.NewRequestHandler(service)
+func NewServer(db *sql.DB) *gin.Engine {
+	r := gin.Default()
 
-	r := mux.NewRouter()
-	r.HandleFunc("/requests", handler.CreateRequest).Methods("POST")
-	r.HandleFunc("/requests", handler.GetRequests).Methods("GET")
+	// health check
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok in server.g"})
+	})
 
-	return &http.Server{
-		Addr:    ":8080",
-		Handler: r,
+	api := r.Group("/api")
+	{
+		api.GET("/requests", handlers.GetManpowerRequests(db))
+		api.POST("/requests", handlers.CreateManpowerRequest(db))
 	}
+
+	return r
 }
