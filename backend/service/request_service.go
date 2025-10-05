@@ -3,23 +3,24 @@ package service
 import (
     "manpower/domain"
     "manpower/repository"
-    "time"
 )
 
 type RequestService struct {
-    repo repository.RequestRepository
+    repo *repository.RequestRepo
 }
 
-func NewRequestService(repo repository.RequestRepository) *RequestService {
+func NewRequestService(repo *repository.RequestRepo) *RequestService {
     return &RequestService{repo: repo}
 }
 
-func (s *RequestService) CreateRequest(req domain.Request) (domain.Request, error) {
-    req.CreatedAt = time.Now()
-    err := s.repo.Save(req)
-    return req, err
+func (s *RequestService) CreateRequest(req *domain.ManpowerRequest) error {
+    return s.repo.Create(req)
 }
 
-func (s *RequestService) GetRequests() ([]domain.Request, error) {
-    return s.repo.FindAll()
+func (s *RequestService) GetRequestByID(id int) (*domain.ManpowerRequest, error) {
+    return s.repo.GetByID(id)
+}
+
+func (s *RequestService) ListRequests() ([]domain.ManpowerRequest, error) {
+    return s.repo.List()
 }

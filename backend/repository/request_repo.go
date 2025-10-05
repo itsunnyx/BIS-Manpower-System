@@ -5,52 +5,52 @@ import (
     "manpower/domain"
 )
 
-type RequestRepository interface {
-    Save(req domain.Request) error
-    FindAll() ([]domain.Request, error)
-}
-
-type requestRepo struct {
+type RequestRepo struct {
     db *sql.DB
 }
 
-func NewRequestRepository(db *sql.DB) RequestRepository {
-    return &requestRepo{db: db}
+func NewRequestRepo(db *sql.DB) *RequestRepo {
+    return &RequestRepo{db: db}
 }
 
-func (r *requestRepo) Save(req domain.Request) error {
-    _, err := r.db.Exec(`
-        INSERT INTO requests 
-        (request_date, department, division, employment_type, contract_type, reason, requester_name, job_code, job_title, 
-         age_from, age_to, gender, nationality, experience, education, special_requirements, created_at)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
-        req.RequestDate, req.Department, req.Division, req.EmploymentType, req.ContractType,
-        req.Reason, req.RequesterName, req.JobCode, req.JobTitle,
-        req.AgeFrom, req.AgeTo, req.Gender, req.Nationality,
-        req.Experience, req.Education, req.SpecialRequirements,
-        req.CreatedAt,
+func (r *RequestRepo) Create(req *domain.ManpowerRequest) error {
+    query := `INSERT INTO manpower_requests 
+              (doc_no, department_id, requested_by, position_title, num_required, reason)
+              VALUES ($1,$2,$3,$4,$5,$6) RETURNING request_id`
+    return r.db.QueryRow(query,
+        req.DocNo, req.DepartmentID, req.RequestedBy,
+        req.PositionTitle, req.NumRequired, req.Reason,
+    ).Scan(&req.ID)
+}
+
+func (r *RequestRepo) GetByID(id int) (*domain.ManpowerRequest, error) {
+    var req domain.ManpowerRequest
+    query := `SELECT request_id, doc_no, department_id, requested_by, position_title, num_required, reason 
+              FROM manpower_requests WHERE request_id=$1`
+    err := r.db.QueryRow(query, id).Scan(
+        &req.ID, &req.DocNo, &req.DepartmentID, &req.RequestedBy,
+        &req.PositionTitle, &req.NumRequired, &req.Reason,
     )
-    return err
+    if err != nil {
+        return nil, err
+    }
+    return &req, nil
 }
 
-func (r *requestRepo) FindAll() ([]domain.Request, error) {
-    rows, err := r.db.Query(`SELECT id, request_date, department, division, employment_type, contract_type, reason,
-        requester_name, job_code, job_title, age_from, age_to, gender, nationality, experience, education, special_requirements, created_at 
-        FROM requests`)
+func (r *RequestRepo) List() ([]domain.ManpowerRequest, error) {
+    rows, err := r.db.Query(`SELECT request_id, doc_no, department_id, requested_by, position_title, num_required, reason FROM manpower_requests`)
     if err != nil {
         return nil, err
     }
     defer rows.Close()
 
-    var requests []domain.Request
+    var requests []domain.ManpowerRequest
     for rows.Next() {
-        var req domain.Request
-        err = rows.Scan(&req.ID, &req.RequestDate, &req.Department, &req.Division,
-            &req.EmploymentType, &req.ContractType, &req.Reason, &req.RequesterName,
-            &req.JobCode, &req.JobTitle, &req.AgeFrom, &req.AgeTo,
-            &req.Gender, &req.Nationality, &req.Experience, &req.Education,
-            &req.SpecialRequirements, &req.CreatedAt)
-        if err != nil {
+        var req domain.ManpowerRequest
+        if err := rows.Scan(
+            &req.ID, &req.DocNo, &req.DepartmentID, &req.RequestedBy,
+            &req.PositionTitle, &req.NumRequired, &req.Reason,
+        ); err != nil {
             return nil, err
         }
         requests = append(requests, req)

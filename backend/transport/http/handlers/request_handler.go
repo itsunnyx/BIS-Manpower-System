@@ -1,44 +1,65 @@
 package handlers
 
 import (
-	"manpower/domain"
-	"manpower/service"
-	"encoding/json"
+	"database/sql"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-type RequestHandler struct {
-	service *service.RequestService
+func GetManpowerRequests(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		rows, err := db.Query(`SELECT request_id, doc_no, position_title, num_required, overall_status FROM manpower_requests`)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer rows.Close()
+
+		var results []map[string]interface{}
+		for rows.Next() {
+			var id int
+			var docNo, positionTitle, status string
+			var num int
+			if err := rows.Scan(&id, &docNo, &positionTitle, &num, &status); err == nil {
+				results = append(results, map[string]interface{}{
+					"id":       id,
+					"doc_no":   docNo,
+					"title":    positionTitle,
+					"num":      num,
+					"status":   status,
+				})
+			}
+		}
+
+		c.JSON(http.StatusOK, results)
+	}
 }
 
-func NewRequestHandler(s *service.RequestService) *RequestHandler {
-	return &RequestHandler{service: s}
-}
+func CreateManpowerRequest(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			DocNo    string `json:"doc_no"`
+			Title    string `json:"title"`
+			Num      int    `json:"num"`
+			Reason   string `json:"reason"`
+		}
 
-func (h *RequestHandler) CreateRequest(w http.ResponseWriter, r *http.Request) {
-	var body domain.Request
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
-		return
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		_, err := db.Exec(
+			`INSERT INTO manpower_requests (doc_no, doc_date, department_id, requested_by, position_title, num_required, reason)
+			 VALUES ($1, CURRENT_DATE, 1, 1, $2, $3, $4)`,
+			req.DocNo, req.Title, req.Num, req.Reason,
+		)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusCreated, gin.H{"message": "request created"})
 	}
-
-	req, err := h.service.CreateRequest(body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(req)
-}
-
-func (h *RequestHandler) GetRequests(w http.ResponseWriter, r *http.Request) {
-	requests, err := h.service.GetRequests()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(requests)
 }
