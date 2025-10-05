@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"backend/models"
+	"manpower/model"
 	"database/sql"
 	"encoding/json"
 	"net/http"
