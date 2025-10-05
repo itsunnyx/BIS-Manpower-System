@@ -26,7 +26,7 @@ func InitDB() *sql.DB {
 	// dsn := "host=localhost port=5432 user=admin password=1234 dbname=hr sslmode=disable"
 
 	host := getEnv("DB_HOST", "localhost")
-	name := getEnv("DB_NAME", "hr")
+	name := getEnv("DB_NAME", "manpower")
 	user := getEnv("DB_USER", "admin")
 	password := getEnv("DB_PASSWORD", "1234")
 	port := getEnv("DB_PORT", "5432")

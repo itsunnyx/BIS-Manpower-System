@@ -2,22 +2,28 @@ package handlers
 
 import (
 
-	"manpower/internal/service"
+	svc "manpower/internal/service"
 
 	"database/sql"
 	"net/http"
 	"github.com/gin-gonic/gin"
 )
 
-func GetManpowerRequests(svc *service.RequestService) gin.HandlerFunc {
-    return func(c *gin.Context) {
-        data, err := svc.ListRequests()
-        if err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-            return
-        }
-        c.JSON(http.StatusOK, data)
-    }
+type RequesterHandler struct {
+	svc *svc.RequestService
+}
+
+func NewRequesterHandler(s *svc.RequestService) *RequesterHandler {
+	return &RequesterHandler{svc: s}
+}
+
+func (h *RequesterHandler) GetManpowerRequests(c *gin.Context) {
+	data, err := h.svc.ListRequests()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, data)
 }
 
 func CreateManpowerRequest(db *sql.DB) gin.HandlerFunc {
