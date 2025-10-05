@@ -1,8 +1,8 @@
 package service
 
 import (
-    "backend/domain"
-    "backend/repository"
+    "manpower/domain"
+    "manpower/repository"
     "time"
 )
 

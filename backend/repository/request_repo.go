@@ -2,7 +2,7 @@ package repository
 
 import (
     "database/sql"
-    "backend/domain"
+    "manpower/domain"
 )
 
 type RequestRepository interface {

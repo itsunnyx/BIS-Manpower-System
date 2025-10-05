@@ -1,9 +1,9 @@
 package http
 
 import (
-	"backend/repository"
-	"backend/service"
-	"backend/transport/http/handlers"
+	"manpower/repository"
+	"manpower/service"
+	"manpower/transport/http/handlers"
 	"database/sql"
 	"net/http"
 

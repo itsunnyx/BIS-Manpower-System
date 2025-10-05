@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"backend/domain"
-	"backend/service"
+	"manpower/domain"
+	"manpower/service"
 	"encoding/json"
 	"net/http"
 )

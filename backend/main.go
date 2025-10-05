@@ -1,7 +1,7 @@
 package main
 
 import (
-	httpTransport "backend/transport/http"
+	httpTransport "manpower/transport/http"
 	"database/sql"
 	"log"
 
