@@ -10,10 +10,10 @@ import (
 )
 
 type RequesterHandler struct {
-	svc *svc.RequestService
+	svc *svc.RequesterService
 }
 
-func NewRequesterHandler(s *svc.RequestService) *RequesterHandler {
+func NewRequesterHandler(s *svc.RequesterService) *RequesterHandler {
 	return &RequesterHandler{svc: s}
 }
 
