@@ -18,7 +18,6 @@ func main(){
 	reqRepo := repository.NewRequestRepo(conn)
 
 	reqSvc  := service.NewRequestService(reqRepo)
-	// managerSvc := service.NewManagerService(reqRepo)
 	
 	r := gin.Default()
 

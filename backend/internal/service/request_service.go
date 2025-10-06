@@ -6,10 +6,10 @@ import (
 )
 
 type RequestService struct {
-    repo repository.RequestRepo
+    repo *repository.RequestRepo
 }
 
-func NewRequestService(repo repository.RequestRepo) *RequestService {
+func NewRequestService(repo *repository.RequestRepo) *RequestService {
     return &RequestService{repo: repo}
 }
 

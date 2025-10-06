@@ -14,7 +14,6 @@ func RegisterRoutes(r *gin.Engine, reqSvc *service.RequestService) {
 	api := r.Group("/api/v1")
 
 	requesterHandler := handlers.NewRequestHandler(reqSvc)
-	// managerHandler := handlers.NewManagerHandler(managerSvc)
 
 	requester := api.Group("/requester")
 	{
