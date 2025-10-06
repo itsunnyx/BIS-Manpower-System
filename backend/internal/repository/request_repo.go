@@ -5,26 +5,15 @@ import (
 	"manpower/internal/domain"
 )
 
-// 1) ประกาศ interface (สัญญา)
-type RequestRepo interface {
-	Create(req *domain.ManpowerRequest) error
-	GetByID(id int) (*domain.ManpowerRequest, error)
-	List() ([]domain.ManpowerRequest, error)
-	ListPendingForManager() ([]domain.ManpowerRequest, error)
-}
-
-// 2) ทำ struct (implementation) ให้ชื่อไม่ชนกับ interface
-type requestRepo struct {
+type RequestRepo struct {
 	db *sql.DB
 }
 
-// 3) Constructor คืนค่าเป็น "interface" ไม่ใช่ struct
-func NewRequestRepo(db *sql.DB) RequestRepo {
-	return &requestRepo{db: db}
+func NewRequestRepo(db *sql.DB) *RequestRepo {
+	return &RequestRepo{db: db}
 }
 
-// 4) เมธอดทั้งหมด ต้องผูกกับ *requestRepo (ตัวเล็ก)
-func (r *requestRepo) Create(req *domain.ManpowerRequest) error {
+func (r *RequestRepo) Create(req *domain.ManpowerRequest) error {
 	query := `
 		INSERT INTO manpower_requests 
 		(doc_no, department_id, requested_by, position_title, num_required, reason)
@@ -36,7 +25,7 @@ func (r *requestRepo) Create(req *domain.ManpowerRequest) error {
 	).Scan(&req.ID)
 }
 
-func (r *requestRepo) GetByID(id int) (*domain.ManpowerRequest, error) {
+func (r *RequestRepo) GetByID(id int) (*domain.ManpowerRequest, error) {
 	var req domain.ManpowerRequest
 	query := `
 		SELECT request_id, doc_no, department_id, requested_by, position_title, num_required, reason 
@@ -51,7 +40,7 @@ func (r *requestRepo) GetByID(id int) (*domain.ManpowerRequest, error) {
 	return &req, nil
 }
 
-func (r *requestRepo) List() ([]domain.ManpowerRequest, error) {
+func (r *RequestRepo) List() ([]domain.ManpowerRequest, error) {
 	rows, err := r.db.Query(`
 		SELECT request_id, doc_no, department_id, requested_by, position_title, num_required, reason
 		FROM manpower_requests`)
@@ -74,7 +63,7 @@ func (r *requestRepo) List() ([]domain.ManpowerRequest, error) {
 	return requests, nil
 }
 
-func (r *requestRepo) ListPendingForManager() ([]domain.ManpowerRequest, error) {
+func (r *RequestRepo) ListPendingForManager() ([]domain.ManpowerRequest, error) {
 	rows, err := r.db.Query(`
 		SELECT request_id, doc_no, position_title, num_required, overall_status
 		FROM manpower_requests
