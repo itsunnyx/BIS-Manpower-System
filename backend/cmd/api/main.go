@@ -16,7 +16,9 @@ func main(){
 	defer conn.Close()
 
 	reqRepo := repository.NewRequestRepo(conn)
-	reqSvc  := service.NewRequestService(reqRepo)
+
+	reqSvc  := service.NewRequesterService(reqRepo)
+	managerSvc := service.NewManagerService(reqRepo)
 	
 	r := gin.Default()
 
@@ -29,7 +31,7 @@ func main(){
 		c.JSON(200, gin.H{"message" : "healthy"})
 	})
 
-	httpx.RegisterRoutes(r, reqSvc)
+	httpx.RegisterRoutes(r, reqSvc, managerSvc)
 
 	r.Run(":8080")
 }
