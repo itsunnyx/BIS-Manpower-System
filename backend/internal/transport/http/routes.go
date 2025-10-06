@@ -9,12 +9,12 @@ import (
 
 )
 
-func RegisterRoutes(r *gin.Engine, reqSvc *service.RequesterService, managerSvc *service.ManagerService) {
+func RegisterRoutes(r *gin.Engine, reqSvc *service.RequestService) {
 
 	api := r.Group("/api/v1")
 
-	requesterHandler := handlers.NewRequesterHandler(reqSvc)
-	managerHandler := handlers.NewManagerHandler(managerSvc)
+	requesterHandler := handlers.NewRequestHandler(reqSvc)
+	// managerHandler := handlers.NewManagerHandler(managerSvc)
 
 	requester := api.Group("/requester")
 	{
@@ -29,7 +29,7 @@ func RegisterRoutes(r *gin.Engine, reqSvc *service.RequesterService, managerSvc 
 
 	manager := api.Group("/manager")
 	{
-		manager.GET("/requests", managerHandler.ListPendingRequests)
+		manager.GET("/requests", requesterHandler.ListPendingRequests)
 		// manager.PUT("/requests/:id/approve", managerHandler.ApproveRequest)
 	}
 
