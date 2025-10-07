@@ -88,6 +88,16 @@ func (h *RequestHandler) ApproveRequest(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "request approved"})
 }
 
+func (h *RequestHandler) RejectRequest(c *gin.Context) {
+	id := c.Param("id")
+	_, err := h.DB.Exec(`UPDATE manpower_requests SET manager_status = 'approved' WHERE request_id = $1`, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "approval failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "request rejected"})
+}
+
 func (h *RequestHandler) DeleteRequest(c *gin.Context) {
 	id := c.Param("id")
 	_, err := h.DB.Exec(`DELETE FROM manpower_requests WHERE request_id = $1`, id)
