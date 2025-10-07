@@ -1,9 +1,14 @@
 package main
 
 import (
-	"log"
 	"manpower/internal/db"
-	"manpower/internal/server"
+	"manpower/internal/repository"
+	"manpower/internal/service"
+	httpx "manpower/internal/transport/http"
+
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -11,11 +16,22 @@ func main() {
 	conn := db.InitDB()
 	defer conn.Close()
 
-	// สร้าง server
-	srv := server.NewServer(conn)
+	reqRepo := repository.NewRequestRepo(conn)
 
-	// รัน server
-	if err := srv.Run(":8080"); err != nil {
-		log.Fatalf("failed to run server: %v", err)
-	}
+	reqSvc := service.NewRequestService(reqRepo)
+
+	r := gin.Default()
+
+	r.GET("/health", func(c *gin.Context) {
+		err := conn.Ping()
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"message": "unhealthy", "error": err})
+			return
+		}
+		c.JSON(200, gin.H{"message": "healthy"})
+	})
+
+	httpx.RegisterRoutes(r, reqSvc)
+
+	r.Run(":8080")
 }

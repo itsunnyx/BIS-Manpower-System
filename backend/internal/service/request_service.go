@@ -1,29 +1,38 @@
 package service
 
 import (
-    "manpower/internal/domain"
-    "manpower/internal/repository"
+	"manpower/internal/domain"
+	"manpower/internal/repository"
 )
 
-type RequesterService struct {
-    repo repository.RequestRepo
+type RequestService struct {
+	repo *repository.RequestRepo
 }
 
-func NewRequesterService(repo repository.RequestRepo) *RequesterService {
-    return &RequesterService{repo: repo}
+func NewRequestService(repo *repository.RequestRepo) *RequestService {
+	return &RequestService{repo: repo}
 }
 
-func (s *RequesterService) CreateRequest(req *domain.ManpowerRequest) error {
-    return s.repo.Create(req)
+func (s *RequestService) CreateRequest(req *domain.ManpowerRequest) error {
+	return s.repo.Create(req)
 }
 
-func (s *RequesterService) GetRequestByID(id int) (*domain.ManpowerRequest, error) {
-    return s.repo.GetByID(id)
+func (s *RequestService) GetRequestByID(id int) (*domain.ManpowerRequest, error) {
+	return s.repo.GetByID(id)
 }
 
-func (s *RequesterService) ListRequests() ([]domain.ManpowerRequest, error) {
-    return s.repo.List()
+func (s *RequestService) ListRequests() ([]domain.ManpowerRequest, error) {
+	return s.repo.List()
 }
-func (s *RequesterService) ListPendingRequests() ([]domain.ManpowerRequest, error) {
-	return s.repo.ListPendingForManager()
+
+func (s *RequestService) UpdateHRStatus(id int, status string) error {
+	return s.repo.UpdateHRStatus(id, status)
+}
+
+func (s *RequestService) UpdateManagerStatus(id int, status string) error {
+	return s.repo.UpdateManagerStatus(id, status)
+}
+
+func (s *RequestService) DeleteRequest(id int) error {
+	return s.repo.Delete(id)
 }
