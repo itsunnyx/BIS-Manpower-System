@@ -1,0 +1,185 @@
+import { Dropdown, DropdownButton, DropdownMenu, DropdownItem, DropdownDivider } from './Dropdown';
+import { ChevronDownIcon } from '@heroicons/react/solid';
+import { Link } from 'react-router-dom';
+
+const Navbar = ({ onToggleSidebar, onToggleMobileSidebar }) => {
+  const currentUser = {
+    firstname: "nakล่าสมบัติ",
+    lastname: "Doefdfggdgdf",
+    role: "Admin",
+  };
+
+  const signOut = () => {
+    console.log("User signed out");
+  };
+
+  return (
+    <nav className="bg-neutral-600 shadow-lg sticky top-0 z-50">
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-14 sm:h-16 md:h-18">
+
+          {/* ฝั่งซ้าย: ปุ่มเมนู + โลโก้ */}
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+            {/* ปุ่มเมนู Mobile */}
+            <button
+              onClick={onToggleMobileSidebar}
+              className="md:hidden p-1.5 sm:p-2 hover:bg-neutral-500 rounded-lg transition-colors active:scale-95 touch-manipulation"
+              aria-label="Toggle mobile menu"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="white" 
+                className="w-5 h-5 sm:w-6 sm:h-6"
+              >
+                <path 
+                  fillRule="evenodd" 
+                  d="M3 6.75A.75.75 0 0 1 3.75 6h16.5a.75.75 0 0 1 0 1.5H3.75A.75.75 0 0 1 3 6.75ZM3 12a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75A.75.75 0 0 1 3 12Zm0 5.25a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75Z" 
+                  clipRule="evenodd" 
+                />
+              </svg>
+            </button>
+
+            {/* ปุ่มเมนู Desktop */}
+            <button
+              onClick={onToggleSidebar}
+              className="hidden md:block p-2 hover:bg-neutral-500 rounded-lg transition-colors active:scale-95"
+              aria-label="Toggle sidebar"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="white" 
+                className="w-5 h-5 lg:w-6 lg:h-6"
+              >
+                <path 
+                  fillRule="evenodd" 
+                  d="M3 6.75A.75.75 0 0 1 3.75 6h16.5a.75.75 0 0 1 0 1.5H3.75A.75.75 0 0 1 3 6.75ZM3 12a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75A.75.75 0 0 1 3 12Zm0 5.25a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75Z" 
+                  clipRule="evenodd" 
+                />
+              </svg>
+            </button>
+
+            {/* Logo - Responsive */}
+            <Link 
+              to="/" 
+              className="flex items-center group"
+            >
+              <img
+                src="/images/nakla.svg"
+                alt="Manpower"
+                className="h-8 sm:h-10 md:h-12 lg:h-13 w-auto group-hover:scale-110 transition-transform duration-200"
+              />
+            </Link>
+
+            {/* Company Name - แสดงเฉพาะ desktop
+            <div className="hidden lg:block">
+              <h1 className="text-white font-semibold text-sm lg:text-base xl:text-lg">
+                ระบบจัดการกำลังคน
+              </h1>
+            </div> */}
+            
+          </div>
+
+          {/* ฝั่งขวา: Notification and Profile */}
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+            {/* Notification Button */}
+            <button 
+              className="p-1.5 sm:p-2 hover:bg-neutral-500 rounded-lg transition-colors active:scale-95 touch-manipulation relative"
+              aria-label="Notifications"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="white" 
+                className="w-5 h-5 sm:w-6 sm:h-6"
+              >
+                <path 
+                  fillRule="evenodd" 
+                  d="M5.25 9a6.75 6.75 0 0 1 13.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 0 1-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 1 1-7.48 0 24.585 24.585 0 0 1-4.831-1.244.75.75 0 0 1-.298-1.205A8.217 8.217 0 0 0 5.25 9.75V9Zm4.502 8.9a2.25 2.25 0 1 0 4.496 0 25.057 25.057 0 0 1-4.496 0Z" 
+                  clipRule="evenodd" 
+                />
+              </svg>
+      
+            </button>
+
+            {/* User Profile with Dropdown */}
+            <Dropdown className="hover:bg-neutral-500 rounded-xl">
+              <DropdownButton className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl cursor-pointer transition-colors active:scale-95 touch-manipulation">
+                {/* Avatar */}
+                <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg bg-amber-700 flex items-center justify-center text-white font-medium text-sm sm:text-base md:text-lg flex-shrink-0">
+                  {currentUser.firstname.charAt(0)}
+                </div>
+
+                {/* User Info - ซ่อนบน mobile เล็ก */}
+                <div className="hidden sm:block text-left max-w-[120px] md:max-w-[150px] lg:max-w-none">
+                  <div className="text-xs md:text-sm font-medium text-white truncate">
+                    {currentUser.firstname}
+                  </div>
+                  <div className="text-xs text-gray-400 truncate">
+                    {currentUser.role}
+                  </div>
+                </div>
+
+                {/* Chevron Icon - ซ่อนบน mobile เล็ก */}
+                <ChevronDownIcon className="hidden sm:block w-4 h-4 md:w-5 md:h-5 text-gray-400 flex-shrink-0" />
+              </DropdownButton>
+
+              <DropdownMenu className="w-48 sm:w-56">
+                {/* User Info Header - แสดงเฉพาะใน dropdown บน mobile */}
+                <div className="sm:hidden px-4 py-3 border-b border-gray-200">
+                  <div className="text-sm font-medium text-gray-900 truncate">
+                    {currentUser.firstname} {currentUser.lastname}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {currentUser.role}
+                  </div>
+                </div>
+
+                <DropdownItem>
+                  <Link to="/profile" className="flex items-center gap-2 sm:gap-3 w-full py-1">
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      viewBox="0 0 24 24" 
+                      fill="gray" 
+                      className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
+                    >
+                      <path 
+                        fillRule="evenodd" 
+                        d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" 
+                        clipRule="evenodd" 
+                      />
+                    </svg>
+                    <span className="text-sm sm:text-base">My Profile</span>
+                  </Link>
+                </DropdownItem>
+
+                <DropdownDivider />
+
+                <DropdownItem onClick={signOut}>
+                  <div className="flex items-center gap-2 sm:gap-3 py-1">
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      viewBox="0 0 24 24" 
+                      fill="gray" 
+                      className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
+                    >
+                      <path 
+                        fillRule="evenodd" 
+                        d="M7.5 3.75A1.5 1.5 0 0 0 6 5.25v13.5a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5V15a.75.75 0 0 1 1.5 0v3.75a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3V5.25a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3V9A.75.75 0 0 1 15 9V5.25a1.5 1.5 0 0 0-1.5-1.5h-6Zm10.72 4.72a.75.75 0 0 1 1.06 0l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H9a.75.75 0 0 1 0-1.5h10.94l-1.72-1.72a.75.75 0 0 1 0-1.06Z" 
+                        clipRule="evenodd" 
+                      />
+                    </svg>
+                    <span className="text-sm sm:text-base text-red-600 font-medium">ออกจากระบบ</span>
+                  </div>
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;

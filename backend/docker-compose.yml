@@ -1,0 +1,39 @@
+services:
+  app:
+    build: .
+    container_name: manpower
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+
+# services:
+#   app:
+#     build: .
+#     container_name: manpower
+#     ports:
+#       - "8080:8080"     # ✅ สำคัญ
+#     environment:
+#       DB_HOST: ${DB_HOST}
+#       DB_PORT: ${DB_PORT}
+#       DB_USER: ${DB_USER}
+#       DB_PASSWORD: ${DB_PASSWORD}
+#       DB_NAME: ${DB_NAME}
+#     restart: unless-stopped
+#     healthcheck:
+#       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+#       interval: 30s
+#       timeout: 10s
+#       retries: 3
+#       start_period: 40s

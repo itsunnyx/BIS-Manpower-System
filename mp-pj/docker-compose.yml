@@ -1,0 +1,13 @@
+services:
+  frontend:
+    build: .       # โฟลเดอร์ที่มี Dockerfile (vite project)
+    container_name: mybookstore-frontend
+    ports:
+      - "3001:80"                 # เปิด web ที่ localhost:3001
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
