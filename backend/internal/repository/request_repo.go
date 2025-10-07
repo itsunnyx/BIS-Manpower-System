@@ -16,7 +16,7 @@ func NewRequestRepo(db *sql.DB) *RequestRepo {
 func (r *RequestRepo) Create(req *domain.ManpowerRequest) error {
 	query := `
 			INSERT INTO manpower_requests 
-			(doc_no, department_id, requested_by, position_title, num_required, reason)
+			(doc_no, department_id, requested_by, position_title, num_required, reason_note)
 			VALUES ($1,$2,$3,$4,$5,$6)
 			RETURNING request_id`
 	return r.db.QueryRow(query,
@@ -42,8 +42,26 @@ func (r *RequestRepo) GetByID(id int) (*domain.ManpowerRequest, error) {
 
 func (r *RequestRepo) List() ([]domain.ManpowerRequest, error) {
 	rows, err := r.db.Query(`
-			SELECT request_id, doc_no, department_id, requested_by, position_title, num_required, reason
-			FROM manpower_requests`)
+		SELECT
+			request_id,
+			doc_no,
+			doc_date,
+			department_id,
+			requested_by,
+			position_title,
+			position_level,
+			num_required,
+			reason_note,                 -- Reason
+			origin_status::text,         -- OriginStatus
+			hr_status::text,             -- HRStatus
+			manager_status::text,     -- ManagerStatus
+			overall_status::text,        -- OverallStatus
+			'' AS remark,                -- ไม่มีคอลัมน์ remark ใน schema -> ให้ค่าว่างไว้ก่อน
+			created_at,
+			updated_at
+		FROM manpower_requests
+		ORDER BY doc_date DESC, request_id DESC
+	`)
 	if err != nil {
 		return nil, err
 	}
@@ -53,12 +71,29 @@ func (r *RequestRepo) List() ([]domain.ManpowerRequest, error) {
 	for rows.Next() {
 		var req domain.ManpowerRequest
 		if err := rows.Scan(
-			&req.ID, &req.DocNo, &req.DepartmentID, &req.RequestedBy,
-			&req.PositionTitle, &req.NumRequired, &req.Reason,
+			&req.ID,
+			&req.DocNo,
+			&req.DocDate,
+			&req.DepartmentID,
+			&req.RequestedBy,
+			&req.PositionTitle,
+			&req.PositionLevel,
+			&req.NumRequired,
+			&req.Reason,
+			&req.OriginStatus,
+			&req.HRStatus,
+			&req.ManagerStatus,   // = management_status
+			&req.OverallStatus,
+			&req.Remark,          // ค่าว่างจาก '' AS remark
+			&req.CreatedAt,
+			&req.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
 		requests = append(requests, req)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 	return requests, nil
 }

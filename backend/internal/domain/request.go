@@ -11,7 +11,7 @@ type ManpowerRequest struct {
 	PositionTitle  string    `json:"position_title"`
 	PositionLevel  string    `json:"position_level"`       // เช่น Officer, Supervisor, Manager
 	NumRequired    int       `json:"num_required"`
-	Reason         string    `json:"reason"`
+	Reason         string    `json:"reason_note"`
 	OriginStatus   string    `json:"origin_status"`        // สถานะฝั่งผู้ขอ
 	HRStatus       string    `json:"hr_status"`            // สถานะฝั่ง HR
 	ManagerStatus  string    `json:"manager_status"`       // สถานะฝั่งผู้อนุมัติ
