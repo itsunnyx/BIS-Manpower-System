@@ -60,8 +60,10 @@ func (h *RequestHandler) CreateRequest(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "request created", "id": req.ID})
 }
 
-// อัพเดทสถานะ HR
-func (h *RequestHandler) UpdateRequestStatus(c *gin.Context) {
+
+
+// HR อนุมัติ
+func (h *RequestHandler) HrApproveRequest(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -70,14 +72,34 @@ func (h *RequestHandler) UpdateRequestStatus(c *gin.Context) {
 	}
 
 	if err := h.svc.UpdateHRStatus(id, "approved"); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "update failed"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "approval failed"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "request updated"})
+	c.JSON(http.StatusOK, gin.H{"message": "request approved"})
 }
 
-// approve
-func (h *RequestHandler) ApproveRequest(c *gin.Context) {
+
+
+// Approver อนุมัติ
+func (h *RequestHandler) ApproverApproveRequest(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+
+	if err := h.svc.UpdateApproverStatus(id, "approved"); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "approval failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "request approved"})
+}
+
+
+
+// Manager อนุมัติ
+func (h *RequestHandler) ManagerApproveRequest(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -91,6 +113,8 @@ func (h *RequestHandler) ApproveRequest(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "request approved"})
 }
+
+
 
 // ลบ
 func (h *RequestHandler) DeleteRequest(c *gin.Context) {

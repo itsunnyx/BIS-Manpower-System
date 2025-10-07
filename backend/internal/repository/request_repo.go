@@ -82,9 +82,9 @@ func (r *RequestRepo) List() ([]domain.ManpowerRequest, error) {
 			&req.Reason,
 			&req.OriginStatus,
 			&req.HRStatus,
-			&req.ManagerStatus,   // = management_status
+			&req.ManagerStatus, // = management_status
 			&req.OverallStatus,
-			&req.Remark,          // ค่าว่างจาก '' AS remark
+			&req.Remark, // ค่าว่างจาก '' AS remark
 			&req.CreatedAt,
 			&req.UpdatedAt,
 		); err != nil {
@@ -129,13 +129,12 @@ func (r *RequestRepo) UpdateManagerStatus(id int, status string) error {
 	_, err := r.db.Exec(`UPDATE manpower_requests SET manager_status=$1 WHERE request_id=$2`, status, id)
 	return err
 }
-
-func (r *RequestRepo) Delete(id int) error {
-	_, err := r.db.Exec(`DELETE FROM manpower_requests WHERE request_id=$1`, id)
+func (r *RequestRepo) UpdateApproverStatus(id int, status string) error {
+	_, err := r.db.Exec(`UPDATE manpower_requests SET origin_status=$1 WHERE request_id=$2`, status, id)
 	return err
 }
 
-func (r *RequestRepo) SyncToRecruitment(id int) error {
-	_, err := r.db.Exec(`INSERT INTO recruitment_sync (request_id, sync_status, response_message) VALUES ($1,'success','mock sync success')`, id)
+func (r *RequestRepo) Delete(id int) error {
+	_, err := r.db.Exec(`DELETE FROM manpower_requests WHERE request_id=$1`, id)
 	return err
 }

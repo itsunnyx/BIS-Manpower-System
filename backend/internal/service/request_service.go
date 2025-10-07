@@ -33,6 +33,10 @@ func (s *RequestService) UpdateManagerStatus(id int, status string) error {
 	return s.repo.UpdateManagerStatus(id, status)
 }
 
+func (s *RequestService) UpdateApproverStatus(id int, status string) error {
+	return s.repo.UpdateApproverStatus(id, status)
+}
+
 func (s *RequestService) DeleteRequest(id int) error {
 	return s.repo.Delete(id)
 }

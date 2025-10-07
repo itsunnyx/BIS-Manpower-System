@@ -21,19 +21,31 @@ func RegisterRoutes(r *gin.Engine, reqSvc *service.RequestService) {
 	hr := api.Group("/hr")
 	{
 		hr.GET("/requests", requestHandler.GetManpowerRequests)
-		hr.PUT("/requests/:id", requestHandler.UpdateRequestStatus) // เช่น HR อัปเดตสถานะ
-		hr.PUT("/requests/:id/approve", requestHandler.ApproveRequest)
+		hr.POST("/requests", requestHandler.CreateRequest)
+		// hr.PUT("/requests/:id", requestHandler.UpdateRequestStatus) // เช่น HR อัปเดตสถานะ
+		hr.PUT("/requests/:id/approve", requestHandler.HrApproveRequest)
 	}
 
 	manager := api.Group("/manager")
 	{
 		manager.GET("/requests", requestHandler.GetManpowerRequests)
 		manager.POST("/requests", requestHandler.CreateRequest)
-		manager.PUT("/requests/:id/approve", requestHandler.ApproveRequest)
+		manager.PUT("/requests/:id/approve", requestHandler.ManagerApproveRequest)
 	}
 
+	approver := api.Group("/approver")
+	{
+		approver.GET("/requests", requestHandler.GetManpowerRequests)
+		approver.POST("/requests", requestHandler.CreateRequest)
+		approver.PUT("/requests/:id/approve", requestHandler.ApproverApproveRequest)
+	}
 	admin := api.Group("/admin")
 	{
 		admin.GET("/requests", requestHandler.GetManpowerRequests)
 	}
+
 }
+
+// http://127.0.0.1:8080/api/v1/manager/requests/1/approve
+
+// http://127.0.0.1:8080/api/v1/manager/requests
