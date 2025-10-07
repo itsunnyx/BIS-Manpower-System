@@ -1,11 +1,12 @@
 package handlers
 
 import (
-
+	// "database/sql"
+	"manpower/internal/domain"
 	svc "manpower/internal/service"
-
-	"database/sql"
 	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,48 +27,83 @@ func (h *RequestHandler) GetManpowerRequests(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
-func CreateManpowerRequest(db *sql.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var req struct {
-			DocNo    string `json:"doc_no"`
-			Title    string `json:"title"`
-			Num      int    `json:"num"`
-			Reason   string `json:"reason"`
-		}
-
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		_, err := db.Exec(
-			`INSERT INTO manpower_requests (doc_no, doc_date, department_id, requested_by, position_title, num_required, reason)
-			 VALUES ($1, CURRENT_DATE, 1, 1, $2, $3, $4)`,
-			req.DocNo, req.Title, req.Num, req.Reason,
-		)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusCreated, gin.H{"message": "request created"})
+// สร้างใหม่
+func (h *RequestHandler) CreateRequest(c *gin.Context) {
+	var input struct {
+		DocNo         string `json:"doc_no"`
+		DepartmentID  int    `json:"department_id"`
+		RequestedBy   int    `json:"requested_by"`
+		PositionTitle string `json:"position_title"`
+		NumRequired   int    `json:"num_required"`
+		Reason        string `json:"reason"`
 	}
+
+	if err := c.BindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
+		return
+	}
+
+	req := &domain.ManpowerRequest{
+		DocNo:         input.DocNo,
+		DepartmentID:  input.DepartmentID,
+		RequestedBy:   input.RequestedBy,
+		PositionTitle: input.PositionTitle,
+		NumRequired:   input.NumRequired,
+		Reason:        input.Reason,
+	}
+
+	if err := h.svc.CreateRequest(req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "insert failed"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "request created", "id": req.ID})
 }
 
-func (h *RequestHandler) ListPendingRequests(c *gin.Context) {
-	data, err := h.svc.ListPendingRequests()
+// อัพเดทสถานะ HR
+func (h *RequestHandler) UpdateRequestStatus(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	if len(data) == 0 {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "No pending requests found",
-			"data":    []any{},
-		})
+	if err := h.svc.UpdateHRStatus(id, "approved"); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "update failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "request updated"})
+}
+
+// approve
+func (h *RequestHandler) ApproveRequest(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	c.JSON(http.StatusOK, data)
+	if err := h.svc.UpdateManagerStatus(id, "approved"); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "approval failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "request approved"})
+}
+
+// ลบ
+func (h *RequestHandler) DeleteRequest(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+
+	if err := h.svc.DeleteRequest(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "delete failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "request deleted"})
 }

@@ -1,40 +1,39 @@
-package httpx
+package server
 
 import (
-
-	"manpower/internal/transport/http/handlers"
 	"manpower/internal/service"
+	"manpower/internal/transport/http/handlers"
 
 	"github.com/gin-gonic/gin"
-
 )
 
 func RegisterRoutes(r *gin.Engine, reqSvc *service.RequestService) {
 
 	api := r.Group("/api/v1")
 
-	requesterHandler := handlers.NewRequestHandler(reqSvc)
+	requestHandler := handlers.NewRequestHandler(reqSvc)
 
 	requester := api.Group("/requester")
 	{
-		requester.GET("/requests", requesterHandler.GetManpowerRequests)
+		requester.GET("/requests", requestHandler.GetManpowerRequests)
 	}
 
-	// hr := api.Group("/hr")
-	// {
-	// 	hr.GET("/requests", hrHandler.ListAllRequests)
-	// 	hr.PUT("/requests/:id/review", hrHandler.ReviewRequest)
-	// }
+	hr := api.Group("/hr")
+	{
+		hr.GET("/requests", requestHandler.GetManpowerRequests)
+		hr.PUT("/requests/:id", requestHandler.UpdateRequestStatus) // เช่น HR อัปเดตสถานะ
+		hr.PUT("/requests/:id/approve", requestHandler.ApproveRequest)
+	}
 
 	manager := api.Group("/manager")
 	{
-		manager.GET("/requests", requesterHandler.ListPendingRequests)
-		// manager.PUT("/requests/:id/approve", managerHandler.ApproveRequest)
+		manager.GET("/requests", requestHandler.GetManpowerRequests)
+		manager.POST("/requests", requestHandler.CreateRequest)
+		manager.PUT("/requests/:id/approve", requestHandler.ApproveRequest)
 	}
 
-	// admin := api.Group("/admin")
-	// {
-	// 	admin.GET("/requests", adminHandler.GetAllRequests)
-	// 	admin.GET("/users", adminHandler.ListUsers)
-	// }
+	admin := api.Group("/admin")
+	{
+		admin.GET("/requests", requestHandler.GetManpowerRequests)
+	}
 }
