@@ -1,10 +1,68 @@
+version: "3.8"
+
 services:
+  # 🧠 Backend (Go)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: manpower
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 🗄️ PostgreSQL Database
+  database:
+    build:
+      context: ./database/docker
+      dockerfile: Dockerfile
+    container_name: bookstore_postgres
+    env_file:
+      - ./database/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # 💻 Frontend (React + Vite)
+  frontend:
+    build:
+      context: ./mp-pj
+      dockerfile: Dockerfile
+    container_name: mybookstore-frontend
+    ports:
+      - "3001:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 🌐 Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
+    container_name: manpower-nginx
     ports:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    depends_on:
+      - backend
+      - frontend
     restart: unless-stopped
+
+volumes:
+  postgres_data:
